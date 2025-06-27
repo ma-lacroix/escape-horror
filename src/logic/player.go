@@ -38,6 +38,22 @@ func (p *Player) checkWithinBoundaries(newMove PairFloat) bool {
 	return true
 }
 
+func (p *Player) checkWithinRoomTransfer(newMove PairFloat) bool {
+	newX := p.position.x + newMove.x
+	newY := p.position.y + newMove.y
+	left := newX - playerSizeX/2
+	right := newX + playerSizeX/2
+	top := newY - playerSizeY/2
+	bottom := newY + playerSizeY/2
+	if (left <= screenWidth*begin && top >= screenHeight*midOne && bottom <= screenHeight*midTwo) ||
+		(right >= screenWidth*end && top >= screenHeight*midOne && bottom <= screenHeight*midTwo) ||
+		(top <= screenHeight*begin && left >= screenWidth*midOne && right <= screenWidth*midTwo) ||
+		(bottom >= screenHeight*end && left >= screenWidth*midOne && right <= screenWidth*midTwo) {
+		return true
+	}
+	return false
+}
+
 func (p *Player) Update(newMove PairFloat) {
 	p.position.x += newMove.x
 	p.position.y += newMove.y

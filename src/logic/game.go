@@ -86,17 +86,31 @@ func (g *Game) HandleMapNavigation() {
 
 func (g *Game) HandleRoaming() {
 	newMove := PairFloat{0.0, 0.0}
+	newPair := g.CurrentRoom
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		newMove = PairFloat{0.0, -playerSpeed}
+		newPair = Pair{g.CurrentRoom.x - 1, g.CurrentRoom.y}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
 		newMove = PairFloat{0.0, playerSpeed}
+		newPair = Pair{g.CurrentRoom.x + 1, g.CurrentRoom.y}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		newMove = PairFloat{-playerSpeed, 0.0}
+		newPair = Pair{g.CurrentRoom.x, g.CurrentRoom.y - 1}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
 		newMove = PairFloat{playerSpeed, 0.0}
+		newPair = Pair{g.CurrentRoom.x, g.CurrentRoom.y + 1}
+	}
+	if newPair != g.CurrentRoom && g.Player.checkWithinRoomTransfer(newMove) {
+		if _, ok := g.Rooms[newPair]; ok {
+			g.CurrentRoom = newPair
+			g.Player.currentRoom = newPair
+			// TODO: player should start from the opposite edge of the room of course
+			g.Player.position.x = float32(screenWidth / 2)
+			g.Player.position.y = float32(screenHeight / 2)
+		}
 	}
 	if (newMove.x != 0.0 || newMove.y != 0.0) && g.Player.checkWithinBoundaries(newMove) {
 		g.Player.Update(newMove)
