@@ -2,6 +2,8 @@ package logic
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/font/basicfont"
 	"image/color"
 )
 
@@ -44,7 +46,7 @@ func NewGame(screenWidth, screenHeight int) *Game {
 	}
 	rooms := generateRooms(&houseLayout)
 	return &Game{
-		MapNavigationTime,
+		RoamingTime,
 		screenWidth,
 		screenHeight,
 		houseLayout,
@@ -105,13 +107,27 @@ func (g *Game) HandleRoaming() {
 	}
 	if newPair != g.CurrentRoom && g.Player.checkWithinRoomTransfer(newMove) {
 		if _, ok := g.Rooms[newPair]; ok {
+			changeX := g.CurrentRoom.y - newPair.y
+			changeY := g.CurrentRoom.x - newPair.x
 			g.CurrentRoom = newPair
 			g.Player.currentRoom = newPair
-			// TODO: player should start from the opposite edge of the room of course
-			g.Player.position.x = float32(screenWidth / 2)
-			g.Player.position.y = float32(screenHeight / 2)
+			if changeX != 0 {
+				if changeX > 0 {
+					g.Player.position.x = float32(screenWidth * 0.85)
+				} else {
+					g.Player.position.x = float32(screenWidth * 0.15)
+				}
+			}
+			if changeY != 0 {
+				if changeY > 0 {
+					g.Player.position.y = float32(screenHeight * 0.85)
+				} else {
+					g.Player.position.y = float32(screenHeight * 0.15)
+				}
+			}
 		}
 	}
+
 	if (newMove.x != 0.0 || newMove.y != 0.0) && g.Player.checkWithinBoundaries(newMove) {
 		g.Player.Update(newMove)
 	}
@@ -126,6 +142,8 @@ func (g *Game) ResetGame() {
 	g.Rooms = rooms
 	g.HouseLayout = houseLayout
 	g.CurrentRoom = Pair{0, 0}
+	g.Player.position = PairFloat{float32(screenWidth / 2), float32(screenHeight / 2)}
+	g.Player.currentRoom = g.CurrentRoom
 }
 
 func (g *Game) Update() error {
@@ -133,10 +151,10 @@ func (g *Game) Update() error {
 		g.ResetGame()
 	}
 	if ebiten.IsKeyPressed(ebiten.Key1) {
-		g.Status = MapNavigationTime
+		g.Status = RoamingTime
 	}
 	if ebiten.IsKeyPressed(ebiten.Key2) {
-		g.Status = RoamingTime
+		g.Status = MapNavigationTime
 	}
 	switch g.Status {
 	case Menu:
@@ -157,5 +175,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.Rooms[g.CurrentRoom].Draw(screen)
 	if g.Player.currentRoom == g.CurrentRoom {
 		g.Player.Draw(screen)
+	}
+	if g.Status == MapNavigationTime {
+		text.Draw(screen, "DEBUG MODE", basicfont.Face7x13, 10, 10, color.Black)
 	}
 }
