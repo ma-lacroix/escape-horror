@@ -15,20 +15,11 @@ const (
 
 type Room struct {
 	startingPoint bool
+	endingPoint   bool
 	doors         [4]bool
-	furniture     []Furniture
-	traps         []Trap
-	puzzles       []Puzzle
-}
-
-func NewRoom(doorLocations [4]bool) *Room {
-	return &Room{
-		startingPoint: true,
-		doors:         doorLocations,
-		furniture:     []Furniture{},
-		traps:         []Trap{},
-		puzzles:       []Puzzle{},
-	}
+	furniture     []*Furniture
+	traps         []*Trap
+	puzzles       []*Puzzle
 }
 
 func (r *Room) DrawRoomBorders(screen *ebiten.Image) {
@@ -77,5 +68,16 @@ func (r *Room) DrawRoomBorders(screen *ebiten.Image) {
 }
 
 func (r *Room) Draw(screen *ebiten.Image) {
+	bColor := color.RGBA{90, 90, 90, 50}
+	if r.startingPoint {
+		bColor = color.RGBA{150, 10, 10, 50}
+	} else if r.endingPoint {
+		bColor = color.RGBA{10, 150, 10, 50}
+	}
+	vector.DrawFilledRect(screen, screenWidth*begin, screenHeight*begin,
+		screenWidth*(end-begin), screenHeight*(end-begin), bColor, true)
 	r.DrawRoomBorders(screen)
+	for _, f := range r.furniture {
+		f.Draw(screen)
+	}
 }

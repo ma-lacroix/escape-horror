@@ -5,50 +5,143 @@ import (
 	"image/color"
 )
 
+type GameStatus int
+
 const (
-	screenWidth  = 800
-	screenHeight = 800
+	Menu GameStatus = iota
+	MapNavigationTime
+	RoamingTime
+	PuzzleTime
+)
+
+const (
+	screenWidth  = 400
+	screenHeight = 400
+	c            = 3
+	r            = 4
+	playerSpeed  = 5.0
 )
 
 type Game struct {
+	Status                    GameStatus
 	ScreenWidth, ScreenHeight int
-	HouseLayout               [3][4]bool
-	Rooms                     [6]*Room
+	HouseLayout               [c][r]bool
+	Rooms                     map[Pair]*Room
+	CurrentRoom               Pair
+	moveCooldown              int
+	moveCooldownMax           int
+	Player                    *Player
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return g.ScreenWidth, g.ScreenHeight
 }
 
-func generateRooms(layout [3][4]bool) [6]*Room {
-	// Graph traversal to generate doors & rooms
-	return [6]*Room{}
-}
-
-func generateHouseLayout() [3][4]bool {
-	// TODO: randomise this
-	return [3][4]bool{{true, true, false, false},
-		{false, true, true, false},
-		{false, false, true, true}}
-}
-
 func NewGame(screenWidth, screenHeight int) *Game {
-	doors := [4]bool{true, false, true, false}
-	rooms := [6]*Room{NewRoom(doors)}
-	houseLayout := generateHouseLayout()
+	houseLayout, e := generateHouseLayout()
+	if e != nil {
+		panic(e)
+	}
+	rooms := generateRooms(&houseLayout)
 	return &Game{
+		MapNavigationTime,
 		screenWidth,
 		screenHeight,
 		houseLayout,
 		rooms,
+		Pair{0, 0},
+		8,
+		8,
+		&Player{Robbie,
+			PairFloat{float32(screenWidth / 2), float32(screenHeight / 2)},
+			Pair{0, 0}},
 	}
 }
 
+func (g *Game) HandleMapNavigation() {
+	if g.moveCooldown > 0 {
+		g.moveCooldown--
+		return
+	}
+	newPair := g.CurrentRoom
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		newPair = Pair{g.CurrentRoom.x - 1, g.CurrentRoom.y}
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		newPair = Pair{g.CurrentRoom.x + 1, g.CurrentRoom.y}
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		newPair = Pair{g.CurrentRoom.x, g.CurrentRoom.y - 1}
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		newPair = Pair{g.CurrentRoom.x, g.CurrentRoom.y + 1}
+	}
+	if newPair != g.CurrentRoom {
+		if _, ok := g.Rooms[newPair]; ok {
+			g.CurrentRoom = newPair
+		}
+	}
+	g.moveCooldown = g.moveCooldownMax
+}
+
+func (g *Game) HandleRoaming() {
+	newMove := PairFloat{0.0, 0.0}
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		newMove = PairFloat{0.0, -playerSpeed}
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		newMove = PairFloat{0.0, playerSpeed}
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		newMove = PairFloat{-playerSpeed, 0.0}
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		newMove = PairFloat{playerSpeed, 0.0}
+	}
+	if (newMove.x != 0.0 || newMove.y != 0.0) && g.Player.checkWithinBoundaries(newMove) {
+		g.Player.Update(newMove)
+	}
+}
+
+func (g *Game) ResetGame() {
+	houseLayout, e := generateHouseLayout()
+	if e != nil {
+		panic(e)
+	}
+	rooms := generateRooms(&houseLayout)
+	g.Rooms = rooms
+	g.HouseLayout = houseLayout
+	g.CurrentRoom = Pair{0, 0}
+}
+
 func (g *Game) Update() error {
+	if ebiten.IsKeyPressed(ebiten.KeyR) {
+		g.ResetGame()
+	}
+	if ebiten.IsKeyPressed(ebiten.Key1) {
+		g.Status = MapNavigationTime
+	}
+	if ebiten.IsKeyPressed(ebiten.Key2) {
+		g.Status = RoamingTime
+	}
+	switch g.Status {
+	case Menu:
+		panic("Not implemented")
+	case MapNavigationTime:
+		g.HandleMapNavigation()
+	case RoamingTime:
+		g.HandleRoaming()
+	case PuzzleTime:
+		panic("Not implemented")
+	}
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{R: 250, G: 250, B: 255, A: 255})
-	g.Rooms[0].Draw(screen)
+	g.Rooms[g.CurrentRoom].Draw(screen)
+	if g.Player.currentRoom == g.CurrentRoom {
+		g.Player.Draw(screen)
+	}
 }
