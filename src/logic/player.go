@@ -54,6 +54,29 @@ func (p *Player) checkWithinRoomTransfer(newMove PairFloat, doors [4]bool) bool 
 	return false
 }
 
+func (p *Player) checkCollisionWithinFurniture(newMove PairFloat, furniture []*Furniture) bool {
+	newX := p.position.x + newMove.x
+	newY := p.position.y + newMove.y
+	left := newX - playerSizeX/2
+	right := newX + playerSizeX/2
+	top := newY - playerSizeY/2
+	bottom := newY + playerSizeY/2
+
+	for _, f := range furniture {
+		fLeft := f.x1
+		fRight := fLeft + f.x2
+		fTop := f.y1
+		fBottom := fTop + f.y2
+		if left < fRight &&
+			right > fLeft &&
+			top < fBottom &&
+			bottom > fTop {
+			return false
+		}
+	}
+	return true
+}
+
 func (p *Player) Update(newMove PairFloat) {
 	p.position.x += newMove.x
 	p.position.y += newMove.y

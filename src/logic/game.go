@@ -130,7 +130,8 @@ func (g *Game) HandleRoaming() {
 		}
 	}
 
-	if (newMove.x != 0.0 || newMove.y != 0.0) && g.Player.checkWithinBoundaries(newMove) {
+	if (newMove.x != 0.0 || newMove.y != 0.0) && g.Player.checkWithinBoundaries(newMove) &&
+		g.Player.checkCollisionWithinFurniture(newMove, g.Rooms[g.CurrentRoom].furniture) {
 		g.Player.Update(newMove)
 	}
 }
