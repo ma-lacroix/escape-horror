@@ -61,6 +61,7 @@ func NewGame(screenWidth, screenHeight int) *Game {
 }
 
 func (g *Game) HandleMapNavigation() {
+	// debug mode -> to be deleted once the game is complete
 	if g.moveCooldown > 0 {
 		g.moveCooldown--
 		return
@@ -105,12 +106,11 @@ func (g *Game) HandleRoaming() {
 		newMove = PairFloat{playerSpeed, 0.0}
 		newPair = Pair{g.CurrentRoom.x, g.CurrentRoom.y + 1}
 	}
-	if newPair != g.CurrentRoom && g.Player.checkWithinRoomTransfer(newMove) {
+	if newPair != g.CurrentRoom && g.Player.checkWithinRoomTransfer(newMove, g.Rooms[g.CurrentRoom].doors) {
 		if _, ok := g.Rooms[newPair]; ok {
 			changeX := g.CurrentRoom.y - newPair.y
 			changeY := g.CurrentRoom.x - newPair.x
-			g.CurrentRoom = newPair
-			g.Player.currentRoom = newPair
+			// Section below: screen wrapping between adjacent rooms
 			if changeX != 0 {
 				if changeX > 0 {
 					g.Player.position.x = float32(screenWidth * 0.85)
@@ -125,6 +125,8 @@ func (g *Game) HandleRoaming() {
 					g.Player.position.y = float32(screenHeight * 0.15)
 				}
 			}
+			g.CurrentRoom = newPair
+			g.Player.currentRoom = newPair
 		}
 	}
 
