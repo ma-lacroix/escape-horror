@@ -1,5 +1,13 @@
 package logic
 
+import (
+	"bytes"
+	"github.com/hajimehoshi/ebiten/v2"
+	"image"
+	_ "image/png"
+	"log"
+)
+
 type Queue[T any] struct {
 	items []T
 }
@@ -30,4 +38,16 @@ type Pair struct {
 type PairFloat struct {
 	x float32
 	y float32
+}
+
+func loadImage(path string) *ebiten.Image {
+	data, err := imageFS.ReadFile(path)
+	if err != nil {
+		log.Fatalf("Failed to read embedded image %s: %v", path, err)
+	}
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		log.Fatalf("Failed to decode image %s: %v", path, err)
+	}
+	return ebiten.NewImageFromImage(img)
 }

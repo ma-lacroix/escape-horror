@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"embed"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font/basicfont"
@@ -23,6 +24,9 @@ const (
 	r            = 4
 	playerSpeed  = 5.0
 )
+
+//go:embed media/images/*
+var imageFS embed.FS
 
 type Game struct {
 	Status                    GameStatus
@@ -54,9 +58,7 @@ func NewGame(screenWidth, screenHeight int) *Game {
 		Pair{0, 0},
 		8,
 		8,
-		&Player{Robbie,
-			PairFloat{float32(screenWidth / 2), float32(screenHeight / 2)},
-			Pair{0, 0}},
+		NewPlayer(Robbie),
 	}
 }
 
