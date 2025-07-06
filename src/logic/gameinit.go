@@ -64,9 +64,15 @@ func generateFurniture() []*Furniture {
 	return furniture
 }
 
+func generatePuzzles() *Puzzle {
+	var puzzles *Puzzle
+	return puzzles
+}
+
 func generateRooms(layout *[c][r]bool) map[Pair]*Room {
 	// this function will initialize the rooms, doors, connections, traps, puzzles and displayed furniture
 	rooms := make(map[Pair]*Room)
+	puzzleCounter := 3
 	for i := 0; i < c; i++ {
 		for j := 0; j < r; j++ {
 			if !layout[i][j] {
@@ -77,11 +83,17 @@ func generateRooms(layout *[c][r]bool) map[Pair]*Room {
 			furniture := generateFurniture()
 			startingPoint := checkStartingPoint(i, j)
 			endingPoint := checkEndingPoint(i, j)
-
+			puzzle := NewPuzzle()
+			if i%2 == 0 && j%2 == 0 && puzzleCounter > 0 {
+				// temp logic while I figure out a better way to distribute puzzles and challenges
+				puzzle = generatePuzzles()
+				puzzleCounter--
+			}
 			rooms[Pair{i, j}] = &Room{
 				doors:         doors,
 				startingPoint: startingPoint,
 				endingPoint:   endingPoint,
+				puzzle:        puzzle,
 				furniture:     furniture}
 		}
 	}

@@ -15,7 +15,7 @@ const (
 )
 
 const (
-	playerSizeX = 50
+	playerSizeX = 20
 	playerSizeY = 20
 )
 

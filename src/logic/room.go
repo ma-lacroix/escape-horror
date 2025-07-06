@@ -19,7 +19,7 @@ type Room struct {
 	doors         [4]bool
 	furniture     []*Furniture
 	traps         []*Trap
-	puzzles       []*Puzzle
+	puzzle        *Puzzle
 }
 
 func (r *Room) DrawRoomBorders(screen *ebiten.Image) {
@@ -79,5 +79,8 @@ func (r *Room) Draw(screen *ebiten.Image) {
 	r.DrawRoomBorders(screen)
 	for _, f := range r.furniture {
 		f.Draw(screen)
+	}
+	if r.puzzle != nil {
+		r.puzzle.Draw(screen)
 	}
 }
