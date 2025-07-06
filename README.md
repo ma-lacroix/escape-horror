@@ -12,4 +12,4 @@ A simple escape-room game I'm building with my kids.
 - Add items & door keys
 - Add textures
 - Add sound
-- Add story mesages
+- Add story messages

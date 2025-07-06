@@ -91,40 +91,35 @@ func (g *Game) HandleMapNavigation() {
 
 func (g *Game) HandleRoaming() {
 	newMove := PairFloat{0.0, 0.0}
-	newPair := g.CurrentRoom
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		newMove = PairFloat{0.0, -playerSpeed}
-		newPair = Pair{g.CurrentRoom.x - 1, g.CurrentRoom.y}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
 		newMove = PairFloat{0.0, playerSpeed}
-		newPair = Pair{g.CurrentRoom.x + 1, g.CurrentRoom.y}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		newMove = PairFloat{-playerSpeed, 0.0}
-		newPair = Pair{g.CurrentRoom.x, g.CurrentRoom.y - 1}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
 		newMove = PairFloat{playerSpeed, 0.0}
-		newPair = Pair{g.CurrentRoom.x, g.CurrentRoom.y + 1}
 	}
-	if newPair != g.CurrentRoom && g.Player.checkWithinRoomTransfer(newMove, g.Rooms[g.CurrentRoom].doors) {
+	offset := g.Player.checkWithinRoomTransfer(newMove, g.Rooms[g.CurrentRoom].doors)
+	if offset != (Pair{0, 0}) {
+		newPair := Pair{g.CurrentRoom.x + offset.x, g.CurrentRoom.y + offset.y}
 		if _, ok := g.Rooms[newPair]; ok {
-			changeX := g.CurrentRoom.y - newPair.y
-			changeY := g.CurrentRoom.x - newPair.x
-			// Section below: screen wrapping between adjacent rooms
-			if changeX != 0 {
-				if changeX > 0 {
-					g.Player.position.x = float32(screenWidth * 0.85)
+			// screen wrapping
+			if offset.x != 0 {
+				if offset.x > 0 {
+					g.Player.position.y = float32(screenWidth * 0.15)
 				} else {
-					g.Player.position.x = float32(screenWidth * 0.15)
+					g.Player.position.y = float32(screenWidth * 0.85)
 				}
 			}
-			if changeY != 0 {
-				if changeY > 0 {
-					g.Player.position.y = float32(screenHeight * 0.85)
+			if offset.y != 0 {
+				if offset.y > 0 {
+					g.Player.position.x = float32(screenHeight * 0.15)
 				} else {
-					g.Player.position.y = float32(screenHeight * 0.15)
+					g.Player.position.x = float32(screenHeight * 0.85)
 				}
 			}
 			g.CurrentRoom = newPair
