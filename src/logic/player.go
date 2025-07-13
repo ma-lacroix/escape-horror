@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image"
@@ -95,6 +96,26 @@ func (p *Player) checkCollisionWithinFurniture(newMove PairFloat, furniture []*F
 		}
 	}
 	return true
+}
+
+func (p *Player) checkCollisionWithPuzzle(puzzle *Puzzle) bool {
+	left := p.position.x - playerSizeX/2
+	right := p.position.x + playerSizeX/2
+	top := p.position.y - playerSizeY/2
+	bottom := p.position.y + playerSizeY/2
+
+	fLeft := puzzle.position.x
+	fRight := puzzle.position.x + puzzleSizeX
+	fTop := puzzle.position.y
+	fBottom := puzzle.position.y + puzzleSizeY
+	if left < fRight &&
+		right > fLeft &&
+		top < fBottom &&
+		bottom > fTop {
+		fmt.Println("Puzzle collision detected")
+		return true
+	}
+	return false
 }
 
 func (p *Player) Update(newMove PairFloat) {

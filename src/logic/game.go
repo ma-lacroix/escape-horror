@@ -131,6 +131,16 @@ func (g *Game) HandleRoaming() {
 		g.Player.checkCollisionWithinFurniture(newMove, g.Rooms[g.CurrentRoom].furniture) {
 		g.Player.Update(newMove)
 	}
+	if g.Rooms[g.CurrentRoom].puzzle != nil && g.Player.checkCollisionWithPuzzle(g.Rooms[g.CurrentRoom].puzzle) {
+		g.Status = PuzzleTime
+	}
+}
+
+func (g *Game) HandlePuzzleTime() {
+	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		g.Player.Update(PairFloat{0.0, -playerSizeY})
+		g.Status = RoamingTime
+	}
 }
 
 func (g *Game) ResetGame() {
@@ -164,7 +174,7 @@ func (g *Game) Update() error {
 	case RoamingTime:
 		g.HandleRoaming()
 	case PuzzleTime:
-		panic("Not implemented")
+		g.HandlePuzzleTime()
 	}
 
 	return nil
@@ -175,6 +185,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.Rooms[g.CurrentRoom].Draw(screen)
 	if g.Player.currentRoom == g.CurrentRoom {
 		g.Player.Draw(screen)
+	}
+	if g.Status == PuzzleTime {
+		g.Rooms[g.CurrentRoom].puzzle.DrawEnlargedPuzzleScreen(screen)
 	}
 	if g.Status == MapNavigationTime {
 		text.Draw(screen, "DEBUG MODE", basicfont.Face7x13, 10, 10, color.Black)
