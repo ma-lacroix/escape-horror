@@ -15,10 +15,17 @@ const (
 
 type Puzzle struct {
 	position PairFloat
+	solved   bool
 }
 
 func NewPuzzle() *Puzzle {
-	return &Puzzle{PairFloat{screenWidth / 2, screenHeight / 2}}
+	return &Puzzle{
+		PairFloat{screenWidth / 2, screenHeight / 2},
+		false}
+}
+
+func (p *Puzzle) CheckIfAnswerIsCorrect() {
+	p.solved = true
 }
 
 func (p *Puzzle) Draw(screen *ebiten.Image) {

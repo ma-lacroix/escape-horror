@@ -20,8 +20,8 @@ const (
 const (
 	screenWidth  = 400
 	screenHeight = 400
-	c            = 3
-	r            = 4
+	c            = 5
+	r            = 6
 	playerSpeed  = 5.0
 )
 
@@ -137,8 +137,17 @@ func (g *Game) HandleRoaming() {
 }
 
 func (g *Game) HandlePuzzleTime() {
+	if _, ok := g.Player.puzzlesSolved[g.CurrentRoom]; !ok {
+		g.Player.puzzlesSolved[g.CurrentRoom] = true
+	}
+	// TODO: all puzzles are set to 'solved' for now
+	g.Rooms[g.CurrentRoom].puzzle.CheckIfAnswerIsCorrect()
 	if ebiten.IsKeyPressed(ebiten.KeyEnter) {
 		g.Player.Update(PairFloat{0.0, -playerSizeY})
+		if g.Player.puzzlesSolved[g.CurrentRoom] && g.Rooms[g.CurrentRoom].puzzle.solved {
+			g.Player.UpdateKeysAmount()
+			g.Player.puzzlesSolved[g.CurrentRoom] = false
+		}
 		g.Status = RoamingTime
 	}
 }
@@ -152,8 +161,7 @@ func (g *Game) ResetGame() {
 	g.Rooms = rooms
 	g.HouseLayout = houseLayout
 	g.CurrentRoom = Pair{0, 0}
-	g.Player.position = PairFloat{float32(screenWidth / 2), float32(screenHeight / 2)}
-	g.Player.currentRoom = g.CurrentRoom
+	g.Player = NewPlayer(Robbie)
 }
 
 func (g *Game) Update() error {

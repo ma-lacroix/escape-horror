@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image"
@@ -25,17 +24,19 @@ type Player struct {
 	position    PairFloat
 	currentRoom Pair
 	// Not sure if the player items should be in this struct
-	playerKeys int
-	keysImage  *ebiten.Image
+	playerKeys    int
+	puzzlesSolved map[Pair]bool
+	keysImage     *ebiten.Image
 }
 
 func NewPlayer(character Character) *Player {
 	keysImage := loadImage("media/images/lock-and-key.png")
 	return &Player{character: character,
-		position:    PairFloat{float32(screenWidth / 2), float32(screenHeight / 2)},
-		currentRoom: Pair{0, 0},
-		playerKeys:  3,
-		keysImage:   keysImage}
+		position:      PairFloat{float32(screenWidth / 2), float32(screenHeight / 2)},
+		currentRoom:   Pair{0, 0},
+		playerKeys:    0,
+		puzzlesSolved: make(map[Pair]bool),
+		keysImage:     keysImage}
 }
 
 func (p *Player) checkWithinBoundaries(newMove PairFloat) bool {
@@ -112,7 +113,6 @@ func (p *Player) checkCollisionWithPuzzle(puzzle *Puzzle) bool {
 		right > fLeft &&
 		top < fBottom &&
 		bottom > fTop {
-		fmt.Println("Puzzle collision detected")
 		return true
 	}
 	return false
@@ -121,6 +121,12 @@ func (p *Player) checkCollisionWithPuzzle(puzzle *Puzzle) bool {
 func (p *Player) Update(newMove PairFloat) {
 	p.position.x += newMove.x
 	p.position.y += newMove.y
+}
+
+func (p *Player) UpdateKeysAmount() {
+	if p.playerKeys < 4 {
+		p.playerKeys++
+	}
 }
 
 func (p *Player) drawKeys(screen *ebiten.Image) {
