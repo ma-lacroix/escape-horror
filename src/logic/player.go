@@ -2,9 +2,7 @@ package logic
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image"
-	"image/color"
 )
 
 type Character int
@@ -16,7 +14,7 @@ const (
 
 const (
 	playerSizeX = 20
-	playerSizeY = 20
+	playerSizeY = 60
 )
 
 type Player struct {
@@ -27,16 +25,22 @@ type Player struct {
 	playerKeys    int
 	puzzlesSolved map[Pair]bool
 	keysImage     *ebiten.Image
+	amandaImage   *ebiten.Image
+	robbieImage   *ebiten.Image
 }
 
 func NewPlayer(character Character) *Player {
 	keysImage := loadImage("media/images/lock-and-key.png")
+	amandaImage := loadImage("media/images/amanda.png")
+	robbieImage := loadImage("media/images/robbie.png")
 	return &Player{character: character,
 		position:      PairFloat{float32(screenWidth / 2), float32(screenHeight / 2)},
 		currentRoom:   Pair{0, 0},
 		playerKeys:    0,
 		puzzlesSolved: make(map[Pair]bool),
-		keysImage:     keysImage}
+		keysImage:     keysImage,
+		amandaImage:   amandaImage,
+		robbieImage:   robbieImage}
 }
 
 func (p *Player) checkWithinBoundaries(newMove PairFloat) bool {
@@ -149,8 +153,23 @@ func (p *Player) drawKeys(screen *ebiten.Image) {
 	screen.DrawImage(p.keysImage.SubImage(srcRect).(*ebiten.Image), op)
 }
 
+func (p *Player) drawMainCharacter(screen *ebiten.Image) {
+
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(0.04, 0.04)
+	op.GeoM.Translate(float64(p.position.x-30), float64(p.position.y-30))
+
+	if p.character == Amanda {
+		screen.DrawImage(p.amandaImage, op)
+	} else {
+		screen.DrawImage(p.robbieImage, op)
+	}
+
+}
+
 func (p *Player) Draw(screen *ebiten.Image) {
-	vector.DrawFilledRect(screen, p.position.x-playerSizeX/2, p.position.y-playerSizeY/2, playerSizeX, playerSizeY,
-		color.RGBA{250, 50, 200, 255}, true)
+	//vector.DrawFilledRect(screen, p.position.x-playerSizeX/2, p.position.y-playerSizeY/2, playerSizeX, playerSizeY,
+	//	color.RGBA{250, 50, 200, 255}, true)
+	p.drawMainCharacter(screen)
 	p.drawKeys(screen)
 }
